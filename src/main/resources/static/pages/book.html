@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    <title>BookAdmin-图书管理</title>
+    <link rel="icon" href="favicon.ico" type="image/ico">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="/css/style.min.css" rel="stylesheet">
+    <link href="/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="/js/jconfirm/jquery-confirm.min.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="container-fluid p-t-15">
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- 数据表格 -->
+            <div class="card">
+                <div class="card-header"><h4>图书管理</h4></div>
+                <div class="card-body">
+                    <div class="btn-group" id="toolbar">
+                        <button class="btn btn-default" onclick="add()">新增</button>
+                        <button class="btn btn-default" onclick="edit()">编辑</button>
+                        <button class="btn btn-default" onclick="remove()">删除</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable">
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 信息编辑框 -->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">图书信息</h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <!-- 表单 -->
+                            <form id="editForm" class="form-horizontal">
+                                <input type="hidden" name="id"/>
+                                <div class="form-group">
+                                    <label class="col-xs-12" for="book-name">图书名</label>
+                                    <div class="col-xs-12">
+                                        <input class="form-control" type="text" id="book-name" name="name">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-xs-12" for="book-author">作者</label>
+                                    <div class="col-xs-12">
+                                        <input class="form-control" type="text" id="book-author" name="author">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-xs-12" for="publisher-select">出版社</label>
+                                    <div class="col-xs-12">
+                                        <select class="form-control" id="publisher-select" name="publisherId" size="1">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-xs-12" for="category-select">分类</label>
+                                    <div class="col-xs-12">
+                                        <select class="form-control" id="category-select" name="categoryId" size="1">
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-info" onclick="saveOrUpdate()">点击保存</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/js/main.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap-table/bootstrap-table.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap-notify.min.js"></script>
+<script type="text/javascript" src="/js/jconfirm/jquery-confirm.min.js"></script>
+
+
+<script type="text/javascript">
+
+    $(function () {
+        // 初始化表格数据
+        initTableData();
+        // 关闭编辑窗口时清空表单数据
+        $('#myModal').on('hide.bs.modal', function () {
+            // 清空表单元素
+            $.each($("#editForm :input"), function (index, item) {
+                item.value = "";
+            });
+
+            $("#editForm :input").prop("readonly", false);
+            $("#category-select").prop("disabled", false);
+            $("#publisher-select").prop("disabled", false);
+            $(".modal-footer").css("display", "block");
+        })
+    });
+
+    function initTableData() {
+        $("#dataTable").bootstrapTable({
+            ajax: function(param) {
+                $.get('/book/list', function (resp) {
+                    if (resp.flag) {
+                        param.success(resp.data);
+                    } else {
+                        showMessage(resp.message, 'danger');
+                    }
+                }, 'json');
+            },
+            clickToSelect: true,
+            singleSelect: true,
+            pagination: true, // 支持分页
+            toolbar: "#toolbar",
+            search: true,
+            columns: [
+                {checkbox: true, visible: true},
+                {field: 'id', title: '编号'},
+                {field: 'name', title: '图书名'},
+                {field: 'code', title: '图书代码'},
+                {field: 'author', title: '作者'},
+                {field: 'category.name', title: '分类'},
+                {field: 'publisher.name', title: '出版社'},
+                {
+                    field: 'operate',
+                    title: '操作',
+                    formatter: function () {
+                        let html =
+                            '<a href="#!" class="btn btn-xs btn-default m-r-5 edit-btn" title="编辑" data-toggle="tooltip"><i class="mdi mdi-pencil"></i></a>' +
+                            '<a href="#!" class="btn btn-xs btn-default m-r-5 show-btn" title="查看" data-toggle="tooltip"><i class="mdi mdi-eye"></i></a>' +
+                            '<a href="#!" class="btn btn-xs btn-default del-btn" title="删除" data-toggle="tooltip"><i class="mdi mdi-window-close"></i></a>';
+                        return html;
+                    },  // 自定义列
+                    events: {
+                        'click .edit-btn': function (event, value, row, index) {
+                            edit(row);
+                        },
+                        'click .del-btn': function (event, value, row, index) {
+                            remove(row);
+                        },
+                        'click .show-btn': function (event, value, row, index) {
+                            edit(row);
+                            $("#editForm :input").prop("readonly", true);
+                            $("#category-select").prop("disabled", true);
+                            $("#publisher-select").prop("disabled", true);
+                            $(".modal-footer").css("display", "none");
+                        }
+                    }
+                }
+            ]
+        });
+    }
+
+
+    function add() {
+        $("#myModal").modal('show');
+        getSelectInfo();
+    }
+
+    function edit(row) {
+        row = row ? row : $("#dataTable").bootstrapTable('getSelections')[0];
+        if (!row) {
+            showMessage('请选择需要编辑的记录', 'warning');
+            return;
+        }
+        $.get('/book/findById', {id: row.id}, function (resp) {
+            if (resp.flag) {
+                $("#myModal").modal('show');
+                json2Form('editForm', resp.data);
+                getSelectInfo(resp.data);
+            } else {
+                showMessage(resp.message, 'danger');
+            }
+        }, 'json');
+    }
+
+    function remove(row) {
+        row = row ? row : $("#dataTable").bootstrapTable('getSelections')[0];
+        if (!row) {
+            showMessage('请选择需要删除的记录', 'warning');
+            return;
+        }
+        // 弹出确认框
+        $.confirm({
+            title: '操作提示',
+            content: '该操作无法恢复, 是否删除?',
+            buttons: {
+                confirm: {
+                    text: '确认',
+                    action: function () {
+                        $.get('/book/deleteById', {id: row.id}, function (resp) {
+                            if (resp.flag) {
+                                showMessage(resp.message, 'success');
+                            } else {
+                                showMessage(resp.message, 'danger');
+                            }
+                            $("#dataTable").bootstrapTable('refresh');
+                        }, 'json');
+                    }
+                },
+                cancel: {
+                    text: '关闭'
+                }
+            }
+        });
+    }
+
+    function saveOrUpdate() {
+        $.post('/book/saveOrUpdate', $("#editForm").serialize(), function (resp) {
+            if (resp.flag) {
+                $("#myModal").modal('hide');
+                showMessage(resp.message, 'success');
+            } else {
+                showMessage(resp.message, 'danger');
+            }
+            $("#dataTable").bootstrapTable('refresh');
+        }, 'json');
+    }
+
+    function showMessage(message, type) {
+        $.notify({
+            title: '操作提示:',
+            message: message
+        }, {
+            type: type,
+            delay: 2000
+        });
+    }
+
+    function json2Form(formId, data) {
+        // 回显表单数据
+        let formArr = $("#" + formId).serializeArray();
+        for (let i = 0; i < formArr.length; i++) {
+            $("#" + formId + " [name='" + formArr[i].name + "']").val(data[formArr[i].name]);
+        }
+    }
+
+    function getSelectInfo(data) {
+        $("#category-select").empty();
+        $("#publisher-select").empty();
+        $.get('/category/list', function (resp) {
+            if (resp.flag) {
+                $.each(resp.data, function (index, item) {
+                    let option = "<option value=" + item.id + ">" + item.name + "</option>";
+                    $("#category-select").append(option);
+                });
+                if (data) {
+                    $("#category-select option[value='" + data.categoryId + "']").prop("selected", true);
+                }
+            }
+
+        }, 'json');
+
+        $.get('/publisher/list', function (resp) {
+            if (resp.flag) {
+                $.each(resp.data, function (index, item) {
+                    let option = "<option value=" + item.id + ">" + item.name + "</option>";
+                    $("#publisher-select").append(option);
+                });
+                if (data) {
+                    $("#publisher-select option[value='" + data.publisherId + "']").prop("selected", true);
+                }
+            }
+        }, 'json');
+    }
+</script>
+
+</body>
+</html>

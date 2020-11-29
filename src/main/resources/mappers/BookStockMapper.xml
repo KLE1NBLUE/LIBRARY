@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kimming.bookadmin.mapper.BookStockMapper">
+
+    <resultMap id="BaseResultMap" type="cn.kimming.bookadmin.pojo.BookStock">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="stock" jdbcType="INTEGER" property="stock"/>
+        <result column="total_stock" jdbcType="INTEGER" property="totalStock"/>
+        <result column="book_id" jdbcType="BIGINT" property="bookId"/>
+    </resultMap>
+
+    <resultMap id="findAllResultMap" type="cn.kimming.bookadmin.pojo.BookStock" extends="BaseResultMap">
+        <association property="book" javaType="cn.kimming.bookadmin.pojo.Book" columnPrefix="book_">
+            <id column="id" property="id"/>
+            <result column="name" property="name"/>
+            <result column="code" property="code"/>
+        </association>
+    </resultMap>
+
+
+
+    <sql id="Base_Column_List">
+        id, stock, total_stock, book_id
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from bookstock
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="findAll" resultMap="findAllResultMap">
+        select bs.id, bs.stock, bs.total_stock,
+               b.id as book_id, b.code as book_code, b.name as book_name
+        from bookstock bs, book b
+        where bs.book_id = b.id
+    </select>
+
+    <select id="selectByBookId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from bookstock
+        where book_id = #{bookId}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from bookstock
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.kimming.bookadmin.pojo.BookStock"
+            useGeneratedKeys="true">
+        insert into bookstock (stock, total_stock, book_id)
+        values (#{stock,jdbcType=INTEGER}, #{totalStock,jdbcType=INTEGER}, #{bookId,jdbcType=BIGINT})
+    </insert>
+
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.kimming.bookadmin.pojo.BookStock"
+            useGeneratedKeys="true">
+        insert into bookstock
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="stock != null">
+                stock,
+            </if>
+            <if test="totalStock != null">
+                total_stock,
+            </if>
+            <if test="bookId != null">
+                book_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="stock != null">
+                #{stock,jdbcType=INTEGER},
+            </if>
+            <if test="totalStock != null">
+                #{totalStock,jdbcType=INTEGER},
+            </if>
+            <if test="bookId != null">
+                #{bookId,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="cn.kimming.bookadmin.pojo.BookStock">
+        update bookstock
+        <set>
+            <if test="stock != null">
+                stock = #{stock,jdbcType=INTEGER},
+            </if>
+            <if test="totalStock != null">
+                total_stock = #{totalStock,jdbcType=INTEGER},
+            </if>
+            <if test="bookId != null">
+                book_id = #{bookId,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="cn.kimming.bookadmin.pojo.BookStock">
+        update bookstock
+        set stock       = #{stock,jdbcType=INTEGER},
+            total_stock = #{totalStock,jdbcType=INTEGER},
+            book_id     = #{bookId,jdbcType=BIGINT}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateTotalStockById">
+        update bookstock
+        set stock = stock + #{stock},
+            total_stock = total_stock + #{stock}
+        where id = #{id}
+    </update>
+
+</mapper>

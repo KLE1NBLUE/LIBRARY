@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kimming.bookadmin.mapper.BorrowingMapper">
+  <resultMap id="BaseResultMap" type="cn.kimming.bookadmin.pojo.Borrowing">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="borrow_time" jdbcType="TIMESTAMP" property="borrowTime" />
+    <result column="return_time" jdbcType="TIMESTAMP" property="returnTime" />
+    <result column="status" jdbcType="SMALLINT" property="status" />
+    <result column="borrower_id" jdbcType="BIGINT" property="borrowerId" />
+    <result column="book_id" jdbcType="BIGINT" property="bookId" />
+  </resultMap>
+
+  <resultMap id="findAllResultMap" type="cn.kimming.bookadmin.pojo.Borrowing" extends="BaseResultMap">
+    <association property="borrower" javaType="cn.kimming.bookadmin.pojo.Borrower">
+      <id column="borrower_id" property="id"/>
+      <result column="br_name" property="name"/>
+    </association>
+    <association property="book" javaType="cn.kimming.bookadmin.pojo.Book">
+      <id column="book_id" property="id"/>
+      <result column="bk_name" property="name"/>
+    </association>
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, borrow_time, return_time, `status`, borrower_id, book_id
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from borrowing
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+    <select id="findAll" resultMap="findAllResultMap">
+     select
+        bw.id, bw.borrow_time, bw.return_time, bw.status, bw.book_id, bw.borrower_id,
+        br.name as br_name,
+        bk.name as bk_name
+     from borrowing bw, borrower br, book bk
+        where bw.borrower_id = br.id and bw.book_id = bk.id
+    </select>
+
+  <select id="findByStatus" resultMap="findAllResultMap">
+    select
+      bw.id, bw.borrow_time, bw.return_time, bw.status, bw.book_id, bw.borrower_id,
+      br.name as br_name,
+      bk.name as bk_name
+    from borrowing bw, borrower br, book bk
+    where bw.borrower_id = br.id and bw.book_id = bk.id and bw.status = #{status}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from borrowing
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.kimming.bookadmin.pojo.Borrowing" useGeneratedKeys="true">
+    insert into borrowing (borrow_time, return_time, `status`, 
+      borrower_id, book_id)
+    values (#{borrowTime,jdbcType=TIMESTAMP}, #{returnTime,jdbcType=TIMESTAMP}, #{status,jdbcType=SMALLINT}, 
+      #{borrowerId,jdbcType=BIGINT}, #{bookId,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.kimming.bookadmin.pojo.Borrowing" useGeneratedKeys="true">
+    insert into borrowing
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="borrowTime != null">
+        borrow_time,
+      </if>
+      <if test="returnTime != null">
+        return_time,
+      </if>
+      <if test="status != null">
+        `status`,
+      </if>
+      <if test="borrowerId != null">
+        borrower_id,
+      </if>
+      <if test="bookId != null">
+        book_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="borrowTime != null">
+        #{borrowTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="returnTime != null">
+        #{returnTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=SMALLINT},
+      </if>
+      <if test="borrowerId != null">
+        #{borrowerId,jdbcType=BIGINT},
+      </if>
+      <if test="bookId != null">
+        #{bookId,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.kimming.bookadmin.pojo.Borrowing">
+    update borrowing
+    <set>
+      <if test="borrowTime != null">
+        borrow_time = #{borrowTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="returnTime != null">
+        return_time = #{returnTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="status != null">
+        `status` = #{status,jdbcType=SMALLINT},
+      </if>
+      <if test="borrowerId != null">
+        borrower_id = #{borrowerId,jdbcType=BIGINT},
+      </if>
+      <if test="bookId != null">
+        book_id = #{bookId,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.kimming.bookadmin.pojo.Borrowing">
+    update borrowing
+    set borrow_time = #{borrowTime,jdbcType=TIMESTAMP},
+      return_time = #{returnTime,jdbcType=TIMESTAMP},
+      `status` = #{status,jdbcType=SMALLINT},
+      borrower_id = #{borrowerId,jdbcType=BIGINT},
+      book_id = #{bookId,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

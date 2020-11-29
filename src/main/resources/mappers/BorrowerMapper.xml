@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kimming.bookadmin.mapper.BorrowerMapper">
+    <resultMap id="BaseResultMap" type="cn.kimming.bookadmin.pojo.Borrower">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="idCard" jdbcType="VARCHAR" property="idCard"/>
+        <result column="status" jdbcType="SMALLINT" property="status"/>
+        <result column="insert_time" property="insertTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, `name`, phone, idCard, `status`
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from borrower
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List"/>
+      from borrower
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from borrower
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.kimming.bookadmin.pojo.Borrower"
+            useGeneratedKeys="true">
+        insert into borrower (`name`, phone, idCard,
+                              `status`)
+        values (#{name,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, #{idCard,jdbcType=VARCHAR},
+                #{status,jdbcType=SMALLINT})
+    </insert>
+
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.kimming.bookadmin.pojo.Borrower"
+            useGeneratedKeys="true">
+        insert into borrower
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                `name`,
+            </if>
+            <if test="phone != null">
+                phone,
+            </if>
+            <if test="idCard != null">
+                idCard,
+            </if>
+            <if test="status != null">
+                `status`,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null">
+                #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="idCard != null">
+                #{idCard,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=SMALLINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="cn.kimming.bookadmin.pojo.Borrower">
+        update borrower
+        <set>
+            <if test="name != null">
+                `name` = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null">
+                phone = #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="idCard != null">
+                idCard = #{idCard,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                `status` = #{status,jdbcType=SMALLINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="cn.kimming.bookadmin.pojo.Borrower">
+        update borrower
+        set `name`   = #{name,jdbcType=VARCHAR},
+            phone    = #{phone,jdbcType=VARCHAR},
+            idCard   = #{idCard,jdbcType=VARCHAR},
+            `status` = #{status,jdbcType=SMALLINT}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+  <update id="updateStatusById">
+    update borrower
+    set `status` = #{status,jdbcType=SMALLINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

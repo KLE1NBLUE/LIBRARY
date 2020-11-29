@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>BookAdmin-借阅管理</title>
+<link rel="icon" href="favicon.ico" type="image/ico">
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/materialdesignicons.min.css" rel="stylesheet">
+<link href="/css/style.min.css" rel="stylesheet">
+<link href="/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+<link href="/js/jconfirm/jquery-confirm.min.css" rel="stylesheet">
+</head>
+  
+<body>
+<div class="container-fluid p-t-15">
+  <div class="row">
+    <div class="col-lg-12">
+      <!-- 数据表格 -->
+      <div class="card">
+        <div class="card-header"><h4>借阅列表</h4></div>
+        <div class="card-body">
+
+          <div class="btn-group" id="toolbar">
+            <button class="btn btn-default" onclick="lost()">丢失/损坏</button>
+            <select id="select-status" class="form-control" name="status">
+              <option value="-1" selected>全部</option>
+              <option value="0">借阅中</option>
+              <option value="1">超时借阅</option>
+              <option value="2">超时归还</option>
+              <option value="3">已归还</option>
+              <option value="4">丢失/损坏</option>
+            </select>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable">
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 信息编辑框 -->
+      <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">借阅信息</h4>
+            </div>
+            <div class="modal-body">
+
+              <!-- 表单 -->
+              <form id="editForm" class="form-horizontal">
+                <input type="hidden" name="id"/>
+                <div class="form-group">
+                  <label class="col-xs-12" for="borrowing-name">借阅名</label>
+                  <div class="col-xs-12">
+                    <input class="form-control" type="text" id="borrowing-name" name="name">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-xs-12" for="borrowing-code">借阅代码</label>
+                  <div class="col-xs-12">
+                    <input class="form-control" type="text" id="borrowing-code" name="code">
+                  </div>
+                </div>
+              </form>
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+              <button type="button" class="btn btn-info" onclick="saveOrUpdate()">点击保存</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/js/main.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap-table/bootstrap-table.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap-notify.min.js"></script>
+<script type="text/javascript" src="/js/jconfirm/jquery-confirm.min.js"></script>
+
+
+<script type="text/javascript">
+
+  $(function() {
+    // 初始化表格数据
+    initTableData();
+    // 关闭编辑窗口时清空表单数据
+    $('#myModal').on('hide.bs.modal', function () {
+      // 清空表单元素
+      $.each($("#editForm :input"), function(index, item) {
+        item.value = "";
+      });
+
+      $("#editForm :input").prop("readonly", false);
+      $(".modal-footer").css("display", "block");
+    })
+
+    // 筛选状态的下拉框
+    $("#select-status").change(function() {
+      let status = $("#select-status option:selected")[0].value;
+      let url;
+      if (status == -1) {
+        url = '/borrowing/list';
+      } else {
+        url = '/borrowing/findByStatus?status=' + status;
+      }
+      $("#dataTable").bootstrapTable('refreshOptions', {
+        ajax: function(param) {
+          $.get(url, function (resp) {
+            if (resp.flag) {
+              param.success(resp.data);
+            } else {
+              showMessage(resp.message, 'danger');
+            }
+          }, 'json');
+        },
+      });
+    });
+  });
+
+  function initTableData() {
+    $("#dataTable").bootstrapTable({
+      ajax: function(param) {
+        $.get('/borrowing/list', function (resp) {
+          if (resp.flag) {
+            param.success(resp.data);
+          } else {
+            showMessage(resp.message, 'danger');
+          }
+        }, 'json');
+      },
+      clickToSelect: true,
+      singleSelect: true,
+      pagination: true, // 支持分页
+      search: true,
+      toolbar: "#toolbar",
+      columns: [
+        {checkbox: true, visible: true},
+        {field: 'id', title: '编号', visible: false},
+        {field: 'book.name', title: '借阅书籍'},
+        {field: 'borrower.id', title: '借阅人编号'},
+        {field: 'borrower.name', title: '借阅人姓名'},
+        {field: 'borrowTime', title: '借阅时间'},
+        {field: 'returnTime', title: '归还时间'},
+        {
+          field: 'status',
+          title: '状态',
+          formatter: function(value, row) {
+            if (value == 0) {
+              return "<p class='label label-info'>借阅中</p>";
+            } else if (value == 1) {
+              return "<p class='label label-warning'>超时借阅</p>";
+            } else if (value == 2) {
+              return "<p class='label label-danger'>超时归还</p>";
+            } else if (value == 3) {
+              return "<p class='label label-success'>已归还</p>";
+            } else {
+              return "<p class='label label-dark'>丢失/损坏</p>";
+            }
+          }
+        }
+      ]
+    });
+  }
+
+
+  function add() {
+    $("#myModal").modal('show');
+  }
+
+  function lost(row) {
+    row = row ? row : $("#dataTable").bootstrapTable('getSelections')[0];
+    if (!row) {
+      showMessage('请选择需要上报的记录', 'warning');
+      return;
+    }
+    // 弹出确认框
+    $.confirm({
+      title: '操作提示',
+      content: '请确认该书籍已丢失或损坏',
+      buttons: {
+        confirm: {
+          text: '确认',
+          action: function(){
+            $.get('/borrowing/lostBook', {id: row.id}, function(resp){
+              if (resp.flag) {
+                showMessage(resp.message, 'success');
+                // 刷新库存tab
+                let bsUrl = '/pages/bookstock.html';
+                let bsTab = $("iframe[src='"+bsUrl+"']", window.parent.document);
+                if (bsTab) {
+                  bsTab.attr('src', bsUrl);
+                }
+
+              } else {
+                showMessage(resp.message, 'danger');
+              }
+              $("#dataTable").bootstrapTable('refresh');
+            }, 'json');
+          }
+        },
+        cancel: {
+          text: '关闭'
+        }
+      }
+    });
+  }
+
+  function saveOrUpdate() {
+    $.post('/borrowing/saveOrUpdate', $("#editForm").serialize(), function(resp) {
+      if (resp.flag) {
+        $("#myModal").modal('hide');
+        showMessage(resp.message, 'success');
+      } else {
+        showMessage(resp.message, 'danger');
+      }
+      $("#dataTable").bootstrapTable('refresh');
+    }, 'json');
+  }
+
+  function showMessage(message, type) {
+    $.notify({
+      title: '操作提示:',
+      message: message
+    }, {
+      type: type,
+      delay: 2000
+    });
+  }
+
+  function json2Form(formId, data) {
+    // 回显表单数据
+    let formArr = $("#" + formId).serializeArray();
+    for (let i = 0; i < formArr.length; i++) {
+      $("#" + formId + " [name='"+ formArr[i].name +"']").val(data[formArr[i].name]);
+    }
+  }
+</script>
+
+</body>
+</html>

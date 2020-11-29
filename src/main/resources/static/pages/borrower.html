@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>BookAdmin-读者数据</title>
+<link rel="icon" href="favicon.ico" type="image/ico">
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/materialdesignicons.min.css" rel="stylesheet">
+<link href="/css/style.min.css" rel="stylesheet">
+<link href="/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+<link href="/js/jconfirm/jquery-confirm.min.css" rel="stylesheet">
+</head>
+  
+<body>
+<div class="container-fluid p-t-15">
+  <div class="row">
+    <div class="col-lg-12">
+      <!-- 数据表格 -->
+      <div class="card">
+        <div class="card-header"><h4>读者数据</h4></div>
+        <div class="card-body">
+
+          <div class="btn-group" id="toolbar">
+            <!--<button class="btn btn-default" onclick="add()">新增</button>
+            <button class="btn btn-default" onclick="edit()">编辑</button>
+            <button class="btn btn-default" onclick="remove()">删除</button>-->
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable">
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 信息编辑框 -->
+      <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">读者信息</h4>
+            </div>
+            <div class="modal-body">
+
+              <!-- 表单 -->
+              <form id="editForm" class="form-horizontal">
+                <input type="hidden" name="id"/>
+                <div class="form-group">
+                  <label class="col-xs-12" for="borrower-name">读者名</label>
+                  <div class="col-xs-12">
+                    <input class="form-control" type="text" id="borrower-name" name="name">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-xs-12" for="borrower-code">读者代码</label>
+                  <div class="col-xs-12">
+                    <input class="form-control" type="text" id="borrower-code" name="code">
+                  </div>
+                </div>
+              </form>
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+              <button type="button" class="btn btn-info" onclick="saveOrUpdate()">点击保存</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/js/main.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap-table/bootstrap-table.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap-notify.min.js"></script>
+<script type="text/javascript" src="/js/jconfirm/jquery-confirm.min.js"></script>
+
+<!--行编辑-->
+<link href="/js/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.min.css" rel="stylesheet">
+<script type="text/javascript" src="/js/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+<script type="text/javascript" src="/js/bootstrap-table/extensions/editable/bootstrap-table-editable.min.js"></script>
+
+
+<script type="text/javascript">
+
+  $(function() {
+    // 初始化表格数据
+    initTableData();
+    // 关闭编辑窗口时清空表单数据
+    $('#myModal').on('hide.bs.modal', function () {
+      // 清空表单元素
+      $.each($("#editForm :input"), function(index, item) {
+        item.value = "";
+      });
+
+      $("#editForm :input").prop("readonly", false);
+      $(".modal-footer").css("display", "block");
+    })
+  });
+
+  function initTableData() {
+    $("#dataTable").bootstrapTable({
+      ajax: function(param) {
+        $.get('/borrower/list', function (resp) {
+          if (resp.flag) {
+            param.success(resp.data);
+          } else {
+            showMessage(resp.message, 'danger');
+          }
+        }, 'json');
+      },
+      pagination: true, // 支持分页
+      toolbar: "#toolbar",
+      search: true,
+      columns: [
+        {field: 'id', title: '编号'},
+        {field: 'name', title: '读者名'},
+        {field: 'phone', title: '手机号'},
+        {field: 'idCard', title: '身份证号码'},
+        {
+          field: 'status',
+          title: '状态',
+          editable: {
+            type: 'select',
+            title: "状态",
+            source: [
+              {value: 0, text: '正常'},
+              {value: 1, text: '冻结'}
+            ],
+            noeditFormatter: function (value, row, index) {
+              let result;
+              if (value == 0) {
+                result = { filed: "status", value: "正常", class: "label label-success" };
+              } else if (value == 1){
+                result = { filed: "status", value: "禁用", class: "label label-danger" };
+              }
+              return result; // 这里对bootstrap-table-editable.min.js做了一些修改，让其能接收class
+            },
+
+            highlight: false
+          }
+        },
+      ],
+      onEditableSave: function (field, row, oldValue, $el) {
+        $.ajax({
+          type: "get",
+          url: "/borrower/updateStatusById",
+          data: {
+            id: row.id,
+            status: row.status
+          },
+          dataType: 'json',
+          success: function (data, status) {
+            if (data.flag) {
+              showMessage(data.message, "success")
+            } else {
+              showMessage(data.message, "danger")
+            }
+          },
+          error: function () {
+            showMessage("编辑失败", "danger")
+          },
+          complete: function () {
+            $("#dataTable").bootstrapTable('refresh');
+          }
+
+        });
+      }
+    });
+  }
+
+
+  function add() {
+    $("#myModal").modal('show');
+  }
+
+  function edit(row) {
+    row = row ? row : $("#dataTable").bootstrapTable('getSelections')[0];
+    if (!row) {
+      showMessage('请选择需要编辑的记录', 'warning');
+      return;
+    }
+    $.get('/borrower/findById', {id: row.id}, function(resp){
+      if (resp.flag) {
+        $("#myModal").modal('show');
+        json2Form('editForm', resp.data);
+      } else {
+        showMessage(resp.message, 'danger');
+      }
+    }, 'json');
+  }
+
+  function remove(row) {
+    row = row ? row : $("#dataTable").bootstrapTable('getSelections')[0];
+    if (!row) {
+      showMessage('请选择需要删除的记录', 'warning');
+      return;
+    }
+    // 弹出确认框
+    $.confirm({
+      title: '操作提示',
+      content: '该操作无法恢复, 是否删除?',
+      buttons: {
+        confirm: {
+          text: '确认',
+          action: function(){
+            $.get('/borrower/deleteById', {id: row.id}, function(resp){
+              if (resp.flag) {
+                showMessage(resp.message, 'success');
+              } else {
+                showMessage(resp.message, 'danger');
+              }
+              $("#dataTable").bootstrapTable('refresh');
+            }, 'json');
+          }
+        },
+        cancel: {
+          text: '关闭'
+        }
+      }
+    });
+  }
+
+  function saveOrUpdate() {
+    $.post('/borrower/saveOrUpdate', $("#editForm").serialize(), function(resp) {
+      if (resp.flag) {
+        $("#myModal").modal('hide');
+        showMessage(resp.message, 'success');
+      } else {
+        showMessage(resp.message, 'danger');
+      }
+      $("#dataTable").bootstrapTable('refresh');
+    }, 'json');
+  }
+
+  function showMessage(message, type) {
+    $.notify({
+      title: '操作提示:',
+      message: message
+    }, {
+      type: type,
+      delay: 2000
+    });
+  }
+
+  function json2Form(formId, data) {
+    // 回显表单数据
+    let formArr = $("#" + formId).serializeArray();
+    for (let i = 0; i < formArr.length; i++) {
+      $("#" + formId + " [name='"+ formArr[i].name +"']").val(data[formArr[i].name]);
+    }
+  }
+</script>
+
+</body>
+</html>
