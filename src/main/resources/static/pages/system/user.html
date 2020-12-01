@@ -23,7 +23,6 @@
 
           <div class="btn-group" id="toolbar">
             <button class="btn btn-default" onclick="add()">新增</button>
-            <button class="btn btn-default" onclick="edit()">编辑</button>
             <button class="btn btn-default" onclick="remove()">删除</button>
           </div>
           <div class="table-responsive">
@@ -53,19 +52,24 @@
                   </div>
                 </div>
                 <div class="form-group">
-                  <label class="col-xs-12" for="user-phone">手机号</label>
+                  <label class="col-xs-12">角色分配</label>
                   <div class="col-xs-12">
-                    <input class="form-control" type="text" id="user-phone" name="phone">
+                    <label class="radio-inline" for="example-inline-radio1">
+                      <input type="radio" id="example-inline-radio1" name="roleId" value="2" checked="checked">
+                      图书管理员
+                    </label>
+                    <label class="radio-inline" for="example-inline-radio2">
+                      <input type="radio" id="example-inline-radio2" name="roleId" value="3">
+                      系统管理员
+                    </label>
                   </div>
                 </div>
               </form>
-
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
               <button type="button" class="btn btn-info" onclick="saveOrUpdate()">点击保存</button>
             </div>
-
           </div>
         </div>
       </div>
@@ -96,12 +100,7 @@
     // 关闭编辑窗口时清空表单数据
     $('#myModal').on('hide.bs.modal', function () {
       // 清空表单元素
-      $.each($("#editForm :input"), function(index, item) {
-        item.value = "";
-      });
-
-      $("#editForm :input").prop("readonly", false);
-      $(".modal-footer").css("display", "block");
+      $("#editForm")[0].reset();
     })
   });
 
@@ -125,7 +124,29 @@
         {checkbox: true, visible: true},
         {field: 'id', title: '编号'},
         {field: 'username', title: '用户名'},
-        {field: 'phone', title: '手机号'},
+        {
+          field: 'roleId',
+          title: '角色',
+          editable: {
+            type: 'select',
+            title: "角色",
+            source: [
+              {value: 2, text: '图书管理员'},
+              {value: 3, text: '系统管理员'}
+            ],
+            noeditFormatter: function (value, row, index) {
+              let result;
+              if (value == 2) {
+                result = { filed: "roleId", value: "图书管理员", class: "label label-cyan" };
+              } else if (value == 3){
+                result = { filed: "roleId", value: "系统管理员", class: "label label-brown" };
+              }
+              return result; // 这里对bootstrap-table-editable.min.js做了一些修改，让其能接收class
+            },
+
+            highlight: false
+          }
+        },
         {
           field: 'status',
           title: '状态',
@@ -152,10 +173,11 @@
       ],
       onEditableSave: function (field, row, oldValue, $el) {
         $.ajax({
-          type: "get",
-          url: "/user/updateStatusById",
+          type: "post",
+          url: "/user/saveOrUpdate",
           data: {
             id: row.id,
+            roleId: row.roleId,
             status: row.status
           },
           dataType: 'json',

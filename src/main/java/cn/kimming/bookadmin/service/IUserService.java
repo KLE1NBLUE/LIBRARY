@@ -21,4 +21,6 @@ public interface IUserService {
     void save(User user);
 
     void updateStatusById(Long id, Integer status);
+
+    void updatePassword(String username, String oldPassword, String newPassword);
 }

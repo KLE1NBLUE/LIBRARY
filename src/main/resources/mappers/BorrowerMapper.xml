@@ -25,6 +25,11 @@
       <include refid="Base_Column_List"/>
       from borrower
     </select>
+    <select id="findCountBeforeDate" resultType="java.lang.Long">
+        select count(0)
+        from borrower
+        where insert_time &lt;= #{date}
+    </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete

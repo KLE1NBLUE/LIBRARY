@@ -14,12 +14,16 @@ public class User implements Serializable {
 
     private String username;
 
-    private String phone;
+    private String password;
 
     /**
      * 状态: 0: 启动 1: 禁用
      */
     private Integer status;
+
+    private Long roleId;
+
+    private Role role;
 
     private static final long serialVersionUID = 1L;
 }

@@ -1,9 +1,6 @@
 package cn.kimming.bookadmin.service.impl;
 
-import cn.kimming.bookadmin.mapper.BookMapper;
-import cn.kimming.bookadmin.mapper.BookStockMapper;
-import cn.kimming.bookadmin.mapper.CategoryMapper;
-import cn.kimming.bookadmin.mapper.PublisherMapper;
+import cn.kimming.bookadmin.mapper.*;
 import cn.kimming.bookadmin.pojo.Book;
 import cn.kimming.bookadmin.pojo.BookStock;
 import cn.kimming.bookadmin.pojo.Category;
@@ -27,6 +24,8 @@ public class BookServiceImpl implements IBookService {
     private CategoryMapper categoryMapper;
     @Autowired
     private BookStockMapper bookStockMapper;
+    @Autowired
+    private BorrowingMapper borrowingMapper;
     @Override
     public List<Book> findAll() {
         return bookMapper.findAll();
@@ -64,6 +63,13 @@ public class BookServiceImpl implements IBookService {
 
     @Override
     public void deleteById(Long id) {
+        // 检查书本是否被借阅中
+        long count = borrowingMapper.findBorrowingCountByBookId(id);
+        if (count > 0){
+            throw new AdminException("删除失败, 该书籍存在借阅中记录");
+        }
+        // 删除库存信息
+        bookStockMapper.deleteByBookId(id);
         bookMapper.deleteByPrimaryKey(id);
     }
 }

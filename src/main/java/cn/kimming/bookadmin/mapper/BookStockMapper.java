@@ -25,4 +25,6 @@ public interface BookStockMapper {
     void updateTotalStockById(@Param("id") Long id,@Param("stock") Integer stock);
 
     BookStock selectByBookId(Long bookId);
+
+    void deleteByBookId(Long bookId);
 }

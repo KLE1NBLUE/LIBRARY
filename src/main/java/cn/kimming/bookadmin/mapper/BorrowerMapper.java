@@ -23,4 +23,6 @@ public interface BorrowerMapper {
     List<Borrower> findAll();
 
     void updateStatusById(@Param("id") Long id, @Param("status")Integer status);
+
+    long findCountBeforeDate(String date);
 }

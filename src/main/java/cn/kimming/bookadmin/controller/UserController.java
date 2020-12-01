@@ -5,9 +5,13 @@ import cn.kimming.bookadmin.service.IUserService;
 import cn.kimming.bookadmin.util.AdminException;
 import cn.kimming.bookadmin.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
@@ -85,6 +89,28 @@ public class UserController {
                 return new Result("启用成功", null);
             }
             return new Result("冻结成功", null);
+        } catch (AdminException e) {
+            e.printStackTrace();
+            return new Result(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result("系统错误");
+        }
+    }
+
+    @GetMapping("/current")
+    public Map<String, Object> currentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("username", userDetails.getUsername());
+        map.put("authorities", userDetails.getAuthorities());
+        return map;
+    }
+
+    @PostMapping("/updatePassword")
+    public Result updatePassword(String username, String oldPassword, String newPassword) {
+        try {
+            userService.updatePassword(username, oldPassword, newPassword);
+            return new Result("修改密码成功", null);
         } catch (AdminException e) {
             e.printStackTrace();
             return new Result(e.getMessage());

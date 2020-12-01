@@ -4,6 +4,8 @@ import cn.kimming.bookadmin.pojo.Borrowing;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
+import java.util.Map;
+
 @Mapper
 public interface BorrowingMapper {
     int deleteByPrimaryKey(Long id);
@@ -21,4 +23,10 @@ public interface BorrowingMapper {
     List<Borrowing> findAll();
 
     List<Borrowing> findByStatus(Integer status);
+
+    long findBorrowingCountByBookId(Long bookId);
+
+    List<Map<String, Object>> findHotBook();
+
+    List<Map<String, Object>> findBorrowCountAfterDate(String firstDay);
 }

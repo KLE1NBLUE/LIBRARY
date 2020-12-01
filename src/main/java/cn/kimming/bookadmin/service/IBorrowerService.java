@@ -8,4 +8,6 @@ public interface IBorrowerService {
     List<Borrower> findAll();
 
     void updateStatusById(Long id, Integer status);
+
+    List<Long> findNewReaderBeforeDate(List<String> dates);
 }

@@ -4,11 +4,20 @@
   <resultMap id="BaseResultMap" type="cn.kimming.bookadmin.pojo.User">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="username" jdbcType="VARCHAR" property="username" />
-    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
     <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="role_id" jdbcType="BIGINT" property="roleId" />
+  </resultMap>
+  
+  <resultMap id="findAllResultMap" type="cn.kimming.bookadmin.pojo.User" extends="BaseResultMap">
+    <association property="role" columnPrefix="role_" javaType="cn.kimming.bookadmin.pojo.Role">
+      <id column="id" property="id"/>
+      <result column="name" property="name"/>
+      <result column="code" property="code"/>
+    </association>
   </resultMap>
   <sql id="Base_Column_List">
-    id, username, phone, `status`
+    id, username, password, `status`, role_id
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select 
@@ -17,58 +26,81 @@
     where id = #{id,jdbcType=BIGINT}
   </select>
 
-    <select id="findAll" resultMap="BaseResultMap">
+    <select id="findAll" resultMap="findAllResultMap">
       select
-      <include refid="Base_Column_List" />
-      from user
+      u.id, u.username, u.password, u.status, u.role_id,
+             r.name as role_name, r.code as role_code
+      from user u, role r
+      where u.role_id != 1 and u.role_id = r.id
     </select>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+
+  <select id="findByUsername" resultMap="findAllResultMap">
+    select
+      u.id, u.username, u.password, u.status, u.role_id,
+      r.name as role_name, r.code as role_code
+    from user u, role r
+    where u.username = #{username} and u.role_id = r.id
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from user
     where id = #{id,jdbcType=BIGINT}
   </delete>
+
   <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.kimming.bookadmin.pojo.User" useGeneratedKeys="true">
-    insert into user (username, phone, `status`
+    insert into user (username, password, `status`, role_id
       )
-    values (#{username,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}
+    values (#{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{roleId}
       )
   </insert>
+
   <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.kimming.bookadmin.pojo.User" useGeneratedKeys="true">
     insert into user
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="username != null">
         username,
       </if>
-      <if test="phone != null">
-        phone,
+      <if test="password != null">
+        password,
       </if>
       <if test="status != null">
         `status`,
+      </if>
+      <if test="roleId != null">
+        role_id,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="username != null">
         #{username,jdbcType=VARCHAR},
       </if>
-      <if test="phone != null">
-        #{phone,jdbcType=VARCHAR},
+      <if test="password != null">
+        #{password,jdbcType=VARCHAR},
       </if>
       <if test="status != null">
         #{status,jdbcType=INTEGER},
       </if>
+      <if test="roleId != null">
+        #{roleId},
+      </if>
     </trim>
   </insert>
+
   <update id="updateByPrimaryKeySelective" parameterType="cn.kimming.bookadmin.pojo.User">
     update user
     <set>
       <if test="username != null">
         username = #{username,jdbcType=VARCHAR},
       </if>
-      <if test="phone != null">
-        phone = #{phone,jdbcType=VARCHAR},
+      <if test="password != null">
+        password = #{password,jdbcType=VARCHAR},
       </if>
       <if test="status != null">
         `status` = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="roleId != null">
+        role_id = #{roleId},
       </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
@@ -76,8 +108,9 @@
   <update id="updateByPrimaryKey" parameterType="cn.kimming.bookadmin.pojo.User">
     update user
     set username = #{username,jdbcType=VARCHAR},
-      phone = #{phone,jdbcType=VARCHAR},
-      `status` = #{status,jdbcType=INTEGER}
+      password = #{password,jdbcType=VARCHAR},
+      `status` = #{status,jdbcType=INTEGER},
+        role_id = #{roleId}
     where id = #{id,jdbcType=BIGINT}
   </update>
 

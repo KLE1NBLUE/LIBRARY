@@ -1,30 +1,40 @@
 package cn.kimming.bookadmin;
 
-import cn.kimming.bookadmin.util.Result;
-import com.alibaba.fastjson.JSONObject;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  * @Author: 刘铭轩KimmingLau
  * @Date: 2020-11-29 18:42
  */
 
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = BookadminApplication.class)
 public class HttpTest {
-    public static void main(String[] args) throws IOException {
-        OkHttpClient client = new OkHttpClient();
+    @Autowired
+    private PasswordEncoder encoder;
+    @Test
+    public void testEncode() {
+        System.out.println(encoder.matches("123456", "$2a$10$7YmZ43ZBWXwadIGE64pTYO2JnCA6tp5qda/2x91dU3LX67sl/n69a"));
 
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/book/list")
-                .build();
+    }
 
-        Response response = client.newCall(request).execute();
-        String resp = response.body().string();
-        Result result = JSONObject.parseObject(resp, Result.class);
-        String message = result.getMessage();
-        System.out.println(message);
+    @Test
+    public void testCal() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.MONTH, -3);
+        for (int i = 0; i < 3; i++) {
+            c.add(Calendar.MONTH, +1);
+            c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+            System.out.println(format.format(c.getTime()));
+        }
     }
 }

@@ -49,6 +49,28 @@
     where bw.borrower_id = br.id and bw.book_id = bk.id and bw.status = #{status}
   </select>
 
+    <select id="findBorrowingCountByBookId" resultType="java.lang.Long">
+      select count(0)
+      from borrowing
+      where book_id = #{bookId} and (`status` = 0 or `status` = 1)
+    </select>
+
+    <select id="findHotBook" resultType="java.util.Map">
+      select count(br.id) as `value`, concat(bk.name,'-',bk.author) as `name`
+      from borrowing br, book bk
+      where br.book_id = bk.id and br.borrow_time >= DATE_ADD(curdate(),interval -day(curdate())+1 day)
+      group by br.book_id
+      limit 0, 5
+    </select>
+
+  <select id="findBorrowCountAfterDate" resultType="java.util.Map">
+    select count(bw.id) borrowCount, br.name borrowerName
+    from borrowing bw, borrower br
+    where bw.borrower_id = br.id and bw.borrow_time &gt;= #{date}
+    group by bw.borrower_id
+    limit 0, 5
+  </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from borrowing
     where id = #{id,jdbcType=BIGINT}

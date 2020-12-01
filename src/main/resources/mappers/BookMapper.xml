@@ -38,6 +38,17 @@
         from book b left join category c on b.category_id = c.id left join publisher p on b.publisher_id = p.id
     </select>
 
+    <select id="selectCountByCategoryId" resultType="java.lang.Long">
+        select count(0)
+        from book
+        where category_id = #{categoryId}
+    </select>
+    <select id="selectCountByPublisherId" resultType="java.lang.Long">
+        select count(0)
+        from book
+        where publisher_id = #{publisherId}
+    </select>
+
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete
         from book

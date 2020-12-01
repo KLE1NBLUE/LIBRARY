@@ -50,6 +50,12 @@
         where id = #{id,jdbcType=BIGINT}
     </delete>
 
+    <delete id="deleteByBookId">
+        delete
+        from bookstock
+        where book_id = #{bookId}
+    </delete>
+
     <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.kimming.bookadmin.pojo.BookStock"
             useGeneratedKeys="true">
         insert into bookstock (stock, total_stock, book_id)

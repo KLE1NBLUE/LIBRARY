@@ -20,4 +20,8 @@ public interface BookMapper {
     int updateByPrimaryKey(Book record);
 
     List<Book> findAll();
+
+    long selectCountByCategoryId(Long categoryId);
+
+    long selectCountByPublisherId(Long PublisherId);
 }

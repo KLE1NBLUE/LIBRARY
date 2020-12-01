@@ -23,4 +23,6 @@ public interface UserMapper {
     List<User> findAll();
 
     void updateStatusById(@Param("id") Long id,@Param("status") Integer status);
+
+    User findByUsername(String username);
 }
