@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.kimming.bookadmin.mapper.BookMapper">
+<mapper namespace="com.zane.bookadmin.mapper.BookMapper">
 
-    <resultMap id="BaseResultMap" type="cn.kimming.bookadmin.pojo.Book">
+    <resultMap id="BaseResultMap" type="com.zane.bookadmin.pojo.Book">
         <id column="id" jdbcType="BIGINT" property="id"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="code" jdbcType="VARCHAR" property="code"/>
@@ -11,11 +11,11 @@
         <result column="publisher_id" jdbcType="BIGINT" property="publisherId"/>
     </resultMap>
 
-    <resultMap id="findAllResultMap" extends="BaseResultMap" type="cn.kimming.bookadmin.pojo.Book">
-        <association property="category" javaType="cn.kimming.bookadmin.pojo.Category">
+    <resultMap id="findAllResultMap" extends="BaseResultMap" type="com.zane.bookadmin.pojo.Book">
+        <association property="category" javaType="com.zane.bookadmin.pojo.Category">
             <result column="cname" property="name"/>
         </association>
-        <association property="publisher" javaType="cn.kimming.bookadmin.pojo.Publisher">
+        <association property="publisher" javaType="com.zane.bookadmin.pojo.Publisher">
             <result column="pname" property="name"/>
         </association>
     </resultMap>
@@ -55,14 +55,14 @@
         where id = #{id,jdbcType=BIGINT}
     </delete>
 
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="cn.kimming.bookadmin.pojo.Book"
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.zane.bookadmin.pojo.Book"
             useGeneratedKeys="true">
         insert into book (`name`, code, author,
                           category_id, publisher_id)
         values (#{name,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR}, #{author,jdbcType=VARCHAR},
                 #{categoryId,jdbcType=BIGINT}, #{publisherId,jdbcType=BIGINT})
     </insert>
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="cn.kimming.bookadmin.pojo.Book"
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.zane.bookadmin.pojo.Book"
             useGeneratedKeys="true">
         insert into book
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -100,7 +100,7 @@
             </if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="cn.kimming.bookadmin.pojo.Book">
+    <update id="updateByPrimaryKeySelective" parameterType="com.zane.bookadmin.pojo.Book">
         update book
         <set>
             <if test="name != null">
@@ -121,7 +121,7 @@
         </set>
         where id = #{id,jdbcType=BIGINT}
     </update>
-    <update id="updateByPrimaryKey" parameterType="cn.kimming.bookadmin.pojo.Book">
+    <update id="updateByPrimaryKey" parameterType="com.zane.bookadmin.pojo.Book">
         update book
         set `name`       = #{name,jdbcType=VARCHAR},
             code         = #{code,jdbcType=VARCHAR},

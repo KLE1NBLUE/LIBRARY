@@ -1451,7 +1451,7 @@ input[type=radio] {
 .open>.btn-default.dropdown-toggle {
 	background-color: #f9fafb!important;
     border-color: #ebebeb!important;
-	color: #4d5259
+	color: lightskyblue;
 }
 .btn-default:not([disabled]):not(.disabled).active,
 .btn-default:not([disabled]):not(.disabled):active,

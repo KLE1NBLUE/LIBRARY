@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>首页 - BookAdmin图书管理系统</title>
-    <link rel="icon" href="/images/favicon.ico" type="image/ico">
+<title>首页——图书管理系统</title>
 <link href="/css/bootstrap.min.css" rel="stylesheet">
 <link href="/css/materialdesignicons.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/js/bootstrap-multitabs/multitabs.min.css">
@@ -26,40 +25,26 @@
         
         <nav class="sidebar-main">
           <ul class="nav nav-drawer">
-            <li class="nav-item active"> <a href="/index.html"><i class="mdi mdi-home"></i> <span>后台首页</span></a> </li>
+            <li class="nav-item active"> <a href="/index.html"><i class="mdi mdi-home"></i><span>图书管理</span></a></li>
+
             <li class="nav-item nav-item-has-subnav" id="menu-basic">
-              <a href="javascript:void(0)"><i class="mdi mdi-content-save"></i> <span>基础数据</span></a>
+              <a href="javascript:void(0)"><i class="mdi mdi-content-save"></i> <span>信息修改</span></a>
               <ul class="nav nav-subnav">
-                <li> <a class="multitabs" href="/pages/basic/book.html">图书管理</a> </li>
                 <li> <a class="multitabs" href="/pages/basic/category.html">分类管理</a> </li>
                 <li> <a class="multitabs" href="/pages/basic/publisher.html">出版社管理</a> </li>
               </ul>
             </li>
-              <li class="nav-item nav-item-has-subnav" id="menu-system">
-                  <a href="javascript:void(0)"><i class="mdi mdi-settings"></i> <span>系统管理</span></a>
-                  <ul class="nav nav-subnav">
-                      <li> <a class="multitabs" href="/pages/system/user.html">用户管理</a> </li>
-                  </ul>
-              </li>
+
             <li class="nav-item nav-item-has-subnav" id="menu-business">
-                <a href="javascript:void(0)"><i class="mdi mdi-format-align-justify"></i> <span>业务操作</span></a>
-                <ul class="nav nav-subnav">
-                    <li> <a class="multitabs" href="/pages/business/bookstock.html">库存管理</a> </li>
-                    <li> <a class="multitabs" href="/pages/business/borrowing.html">借阅列表</a> </li>
-                    <li> <a class="multitabs" href="/pages/business/borrower.html">读者数据</a> </li>
-                </ul>
+              <a href="javascript:void(0)"><i class="mdi mdi-format-align-justify"></i> <span>业务操作</span></a>
+              <ul class="nav nav-subnav">
+                <li> <a class="multitabs" href="/pages/business/bookstock.html">库存管理</a> </li>
+                <!--<li> <a class="multitabs" href="/pages/business/borrowing.html">借阅列表</a> </li>-->
+                <li> <a class="multitabs" href="/pages/business/borrower.html">读者数据</a> </li>
+              </ul>
             </li>
-            <li class="nav-item nav-item-has-subnav" id="menu-chart">
-                <a href="javascript:void(0)"><i class="mdi mdi-poll"></i><span>图表分析</span></a>
-                <ul class="nav nav-subnav">
-                    <li> <a class="multitabs" href="/pages/report/report.html">展示图表</a> </li>
-                </ul>
-            </li>
-            </ul>
+
         </nav>
-        <div class="sidebar-footer">
-          <p class="copyright">Copyright &copy; 2020. <a target="_blank" href="https://gitee.com/KimmingLau">徐+江的快乐小屋</a> All rights reserved.</p>
-        </div>
       </div>
       
     </aside>
